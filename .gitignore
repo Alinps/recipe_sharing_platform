@@ -1,0 +1,37 @@
+# Virtual environment
+.env
+venv/
+env/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.pyc
+*.pyo
+
+# IDE-specific files (e.g., VS Code, PyCharm)
+.idea/
+.vscode/
+*.sublime-workspace
+*.sublime-project
+
+# Django stuff
+*.log
+*.pot
+local_settings.py
+db.sqlite3
+/media/
+/static/
+
+# OS-specific files
+.DS_Store
+Thumbs.db
+
+# Testing and coverage
+.coverage
+.tox/
+htmlcov/
+
+# Distribution and packaging
+build/
+dist/
+*.egg-info/
