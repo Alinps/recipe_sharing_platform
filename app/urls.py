@@ -4,7 +4,7 @@ from app import views
 
 urlpatterns = [
     path('signup/',views.Signup,name="signup"),
-    path('login/',views.login,name="login"),
+    path('login_user/',views.Login_user,name="login"),
     path('create/',views.create_recipe,name="create"),
     path('list/',views.list_recipe,name="list"),
     path('recipedetails/<int:pk>',views.recipe_details,name="recipe_details"),
@@ -12,4 +12,6 @@ urlpatterns = [
     path('search/',views.recipe_search,name="search"),
     path('passwordchange/',views.password_change,name="password_change"),
     path('update/',views.edit_recipe,name="edit"),
+     path("chat/", views.chatbot,name="chatbot"),
+     
 ]

@@ -3,13 +3,17 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .models import User,Recipe
-from .serializers import RecipeSerializer
+from .serializers import RecipeSerializer,RecipeSerializerDetailed
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+import requests
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
 
 
 @api_view(['POST'])
@@ -20,8 +24,16 @@ def Signup(request):
     name = request.data.get("name")
     if not name or not email or not password:
         return Response({'message':'All fields are required'})
+      # validate password
+    try:
+        validate_password(password)
+    except ValidationError as e:
+        return Response(
+            {"message": e.messages},
+            status=status.HTTP_400_BAD_REQUEST
+        )
     if User.objects.filter(email=email).exists():
-        return  JsonResponse({'message':'Email already exist'})
+        return  JsonResponse({'message':'Email already exist'} ,status=status.HTTP_400_BAD_REQUEST)
     user = User.objects.create_user(email=email,password=password) # pyright: ignore[reportAttributeAccessIssue]
     user.name = name
     user.save()
@@ -33,16 +45,16 @@ def Signup(request):
 
 @api_view(["POST"])
 @permission_classes((AllowAny,))
-def login(request):
+def Login_user(request):
     email = request.data.get("email")
     password = request.data.get("password")
     if email is None or password is None:
-        return Response({'error': 'Please provide both username and password'},
+        return Response({'message': 'Please provide both username and password'},
                         status=HTTP_400_BAD_REQUEST)
     user = authenticate(email=email, password=password)
     if not user:
-        return Response({'error': 'Invalid Credentials'},
-                        status=HTTP_404_NOT_FOUND)
+        return Response({'message': 'Invalid Credentials'},
+                        status=status.HTTP_401_UNAUTHORIZED)
     token, _ = Token.objects.get_or_create(user=user)
     return Response({'token': token.key},status=HTTP_200_OK)
 
@@ -58,7 +70,7 @@ def create_recipe(request):
     cooking_time = request.data.get("cooking_time")
     difficulty_level = request.data.get("difficulty_level")
     image = request.FILES.get("image")
-    print(user,title,ingredients,steps,cooking_time,difficulty_level,image)
+
 
     if not title or not ingredients or not steps or not cooking_time or not difficulty_level or not image:
         return JsonResponse({"message":"all fields are required"})
@@ -80,7 +92,7 @@ def create_recipe(request):
 def list_recipe(request):
     recipes = Recipe.objects.all()
     serializer = RecipeSerializer(recipes,many=True)
-    return Response({'data':serializer.data},status=200)
+    return Response({'recipes':serializer.data},status=200)
 
 
 
@@ -91,7 +103,7 @@ def recipe_details(request,pk):
         recipe = Recipe.objects.get(pk = pk)
     except:
         return Response({"message":"Recipe not found"},status=404)
-    serializer = RecipeSerializer(recipe)
+    serializer = RecipeSerializerDetailed(recipe)
     return Response({"data":serializer.data})
 
 
@@ -113,7 +125,7 @@ def recipe_search(request):
     recipes = Recipe.objects.filter(title__icontains=qtitle)
     if not recipes:
         return Response({"message":"no items found"})
-    serializer = RecipeSerializer(recipes,many=True)
+    serializer = RecipeSerializerDetailed(recipes,many=True)
     return Response({"data":serializer.data})
 
 
@@ -187,6 +199,47 @@ def edit_recipe(request):
 
 
 
+
+
+
+
+
+OPENROUTER_API_KEY = "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"
+
+
+@api_view(["POST"])
+@permission_classes([AllowAny])
+def chatbot(request):
+
+    user_message = request.data.get("message")
+
+    prompt = f"""
+                You are a helpful cooking assistant for a recipe sharing platform.
+                User question:{user_message}
+            """
+
+    url = "https://openrouter.ai/api/v1/chat/completions"
+
+    headers = {
+        "Authorization": f"Bearer {OPENROUTER_API_KEY}",
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "model": "meta-llama/llama-3-8b-instruct",
+        "messages": [
+            {"role": "system", "content": "You are a cooking expert assistant."},
+            {"role": "user", "content": prompt}
+        ]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    result = response.json()
+
+    reply = result["choices"][0]["message"]["content"]
+
+    return Response({"reply": reply})
 
     
 
