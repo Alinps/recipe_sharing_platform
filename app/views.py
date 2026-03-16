@@ -1,9 +1,10 @@
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .models import User,Recipe
-from .serializers import RecipeSerializer,RecipeSerializerDetailed
+from .serializers import RecipeSerializer,RecipeSerializerDetailed, UserProfileSerializer
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
@@ -87,24 +88,47 @@ def create_recipe(request):
     return JsonResponse({"message":"Recipe created successfully"},status = 200)
 
 
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def list_recipe(request):
+#     recipes = Recipe.objects.all()
+#     serializer = RecipeSerializer(recipes,many=True)
+#     return Response({'recipes':serializer.data},status=200)
+
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def list_recipe(request):
-    recipes = Recipe.objects.all()
-    serializer = RecipeSerializer(recipes,many=True)
-    return Response({'recipes':serializer.data},status=200)
+    # Use select_related to join the User table and Recipe table in one query
+    recipes = Recipe.objects.select_related('user').all()
+    
+    serializer = RecipeSerializer(recipes, many=True)
+    return Response({'recipes': serializer.data}, status=200)
 
+
+
+
+# @api_view(["GET"])
+# @permission_classes([IsAuthenticated])
+# def recipe_details(request,pk):
+#     try:
+#         recipe = Recipe.objects.get(pk = pk)
+#     except:
+#         return Response({"message":"Recipe not found"},status=404)
+#     serializer = RecipeSerializerDetailed(recipe)
+#     return Response({"data":serializer.data})
 
 
 @api_view(["GET"])
 @permission_classes([IsAuthenticated])
-def recipe_details(request,pk):
-    try:
-        recipe = Recipe.objects.get(pk = pk)
-    except:
-        return Response({"message":"Recipe not found"},status=404)
+def recipe_details(request, pk):
+    # Using select_related here makes it 1 query instead of 2
+    recipe = Recipe.objects.select_related('user').filter(pk=pk).first()
+    
+    if not recipe:
+        return Response({"message": "Recipe not found"}, status=404)
+        
     serializer = RecipeSerializerDetailed(recipe)
-    return Response({"data":serializer.data})
+    return Response({"data": serializer.data})
 
 
 @api_view(["DELETE"])
@@ -122,7 +146,7 @@ def delete_recipe(request,pk):
 @permission_classes([IsAuthenticated])
 def recipe_search(request):
     qtitle = request.query_params.get('qtitle','')
-    recipes = Recipe.objects.filter(title__icontains=qtitle)
+    recipes = Recipe.objects.select_related('user').filter(title__icontains=qtitle)
     if not recipes:
         return Response({"message":"no items found"})
     serializer = RecipeSerializerDetailed(recipes,many=True)
@@ -244,3 +268,13 @@ def chatbot(request):
     
 
 
+@api_view(["GET"])
+@permission_classes([AllowAny])
+def user_profile(request,user_id):
+    user = get_object_or_404(
+        User.objects.prefetch_related('recipe_set'),
+        id=user_id
+    )
+    serializer = UserProfileSerializer(user)
+    return Response(serializer.data)
+    

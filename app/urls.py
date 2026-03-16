@@ -12,6 +12,7 @@ urlpatterns = [
     path('search/',views.recipe_search,name="search"),
     path('passwordchange/',views.password_change,name="password_change"),
     path('update/',views.edit_recipe,name="edit"),
-     path("chat/", views.chatbot,name="chatbot"),
+    path("chat/", views.chatbot,name="chatbot"),
+    path("user_profile/<int:user_id>",views.user_profile,name="user_profile")
      
 ]
