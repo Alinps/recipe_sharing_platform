@@ -57,7 +57,13 @@ def Login_user(request):
         return Response({'message': 'Invalid Credentials'},
                         status=status.HTTP_401_UNAUTHORIZED)
     token, _ = Token.objects.get_or_create(user=user)
-    return Response({'token': token.key},status=HTTP_200_OK)
+    return Response({
+        "token": token.key,
+        "user": {
+            "id": user.id,    # type: ignore
+            "name": user.name # type: ignore
+        }
+    },status=status.HTTP_200_OK)
 
 
 
@@ -96,7 +102,7 @@ def create_recipe(request):
 #     return Response({'recipes':serializer.data},status=200)
 
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
+@permission_classes([AllowAny])
 def list_recipe(request):
     # Use select_related to join the User table and Recipe table in one query
     recipes = Recipe.objects.select_related('user').all()
@@ -229,8 +235,6 @@ def edit_recipe(request):
 
 
 OPENROUTER_API_KEY = "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"
-
-
 @api_view(["POST"])
 @permission_classes([AllowAny])
 def chatbot(request):
@@ -258,13 +262,12 @@ def chatbot(request):
     }
 
     response = requests.post(url, headers=headers, json=data)
-
     result = response.json()
-
-    reply = result["choices"][0]["message"]["content"]
-
+    if "choices" in result:
+        reply = result["choices"][0]["message"]["content"]
+    else:
+        reply = result.get("error", {}).get("message", "Unknown error")
     return Response({"reply": reply})
-
     
 
 
@@ -275,6 +278,24 @@ def user_profile(request,user_id):
         User.objects.prefetch_related('recipe_set'),
         id=user_id
     )
+    print(user)
     serializer = UserProfileSerializer(user)
     return Response(serializer.data)
     
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def logout_view(request):
+    try:
+        # Delete the user's token
+        request.user.auth_token.delete()
+        return Response(
+            {"message": "Logged out successfully"},
+            status=status.HTTP_200_OK
+        )
+    except Exception as e:
+        return Response(
+            {"error": str(e)},
+            status=status.HTTP_400_BAD_REQUEST
+        )
