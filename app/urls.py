@@ -15,5 +15,7 @@ urlpatterns = [
     path('update/',views.edit_recipe,name="edit"),
     path("chat/", views.chatbot,name="chatbot"),
     path("profile/<int:user_id>/",views.user_profile,name="user_profile"),
+    path("profile/<int:user_id>/wishlist/", views.user_wishlist),
+    path('wishlist/toggle/', views.toggle_wishlist),
      
 ]

@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny,IsAuthenticated
-from .models import User,Recipe
+from .models import User,Recipe, WishList
 from .serializers import RecipeSerializer,RecipeSerializerDetailed, UserProfileSerializer
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
@@ -133,7 +133,7 @@ def recipe_details(request, pk):
     if not recipe:
         return Response({"message": "Recipe not found"}, status=404)
         
-    serializer = RecipeSerializerDetailed(recipe)
+    serializer = RecipeSerializerDetailed(recipe, context={'request': request})
     return Response({"data": serializer.data})
 
 
@@ -193,7 +193,6 @@ def password_change(request):
     # set password correctly
     user.set_password(new_password)
     user.save()
-
     return Response({"message": "Password changed successfully."})
 
 
@@ -281,6 +280,41 @@ def user_profile(request,user_id):
     print(user)
     serializer = UserProfileSerializer(user)
     return Response(serializer.data)
+
+
+
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def user_wishlist(request, user_id):
+    wishlist = WishList.objects.filter(user_id=user_id).select_related("recipe")
+    recipes = [item.recipe for item in wishlist]
+    serializer = RecipeSerializer(recipes, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def toggle_wishlist(request):
+    user = request.user
+    recipe_id = request.data.get("recipe_id")
+
+    recipe = get_object_or_404(Recipe, id=recipe_id)
+
+    wishlist_item = WishList.objects.filter(
+        user=user,
+        recipe=recipe
+    ).first()
+
+    if wishlist_item:
+        wishlist_item.delete()
+        return Response({"status": "removed"})
+    else:
+        WishList.objects.create(user=user, recipe=recipe)
+        return Response({"status": "added"})
+
+     
+    
+
     
 
 
