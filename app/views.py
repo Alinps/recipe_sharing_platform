@@ -144,6 +144,11 @@ def delete_recipe(request,pk):
         recipe = Recipe.objects.get(pk=pk)
     except Recipe.DoesNotExist:
         return Response({"message":"Recipe cannot be deleted"},status=404)
+    if recipe.user != request.user:
+        return Response(
+            {"error": "Not authorized"},
+            status=403
+        )
     recipe.delete()
     return Response({"message":"Recipe has been Successfully deleted"})
 
@@ -277,7 +282,6 @@ def user_profile(request,user_id):
         User.objects.prefetch_related('recipe_set'),
         id=user_id
     )
-    print(user)
     serializer = UserProfileSerializer(user)
     return Response(serializer.data)
 
