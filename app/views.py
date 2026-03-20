@@ -15,6 +15,8 @@ import requests
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from django.db.models import Q
+from .utils.pagination import RecipePagination
 
 
 @api_view(['POST'])
@@ -105,10 +107,19 @@ def create_recipe(request):
 @permission_classes([AllowAny])
 def list_recipe(request):
     # Use select_related to join the User table and Recipe table in one query
-    recipes = Recipe.objects.select_related('user').all()
-    
-    serializer = RecipeSerializer(recipes, many=True)
-    return Response({'recipes': serializer.data}, status=200)
+    queryset = Recipe.objects.select_related('user').all()
+    search_query = request.GET.get("search")
+
+    if search_query:
+        queryset = queryset.filter(
+            Q(title__icontains=search_query) |
+            Q(ingredients__icontains=search_query)
+        )
+
+    paginator = RecipePagination()
+    paginated_queryset = paginator.paginate_queryset(queryset, request)
+    serializer = RecipeSerializer(paginated_queryset, many=True)
+    return paginator.get_paginated_response(serializer.data)
 
 
 
