@@ -48,3 +48,23 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'is_active', 'recipes','image']
+
+
+
+# serializers.py
+
+
+
+class ProfileSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ["name", "email", "image"]
+
+    def validate_email(self, value):
+        user = self.instance
+
+        if User.objects.exclude(pk=user.pk).filter(email=value).exists():  # type: ignore
+            raise serializers.ValidationError("Email already exists")
+
+        return value

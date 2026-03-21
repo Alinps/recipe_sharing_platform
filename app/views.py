@@ -4,7 +4,7 @@ from rest_framework.decorators import api_view,permission_classes
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from .models import User,Recipe, WishList
-from .serializers import RecipeSerializer,RecipeSerializerDetailed, UserProfileSerializer
+from .serializers import ProfileSerializer, RecipeSerializer,RecipeSerializerDetailed, UserProfileSerializer
 from django.http import JsonResponse
 from django.contrib.auth import authenticate
 from rest_framework.authtoken.models import Token
@@ -348,3 +348,29 @@ def logout_view(request):
             {"error": str(e)},
             status=status.HTTP_400_BAD_REQUEST
         )
+    
+
+
+
+@api_view(["GET", "PATCH"])
+@permission_classes([IsAuthenticated])
+def profile(request):
+
+    user = request.user
+
+    if request.method == "GET":
+        serializer = ProfileSerializer(user)
+        return Response(serializer.data)
+
+    elif request.method == "PATCH":
+        serializer = UserProfileSerializer(
+            user,
+            data=request.data,
+            partial=True
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
