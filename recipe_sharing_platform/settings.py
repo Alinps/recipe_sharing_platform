@@ -63,6 +63,7 @@ MIDDLEWARE = [
     "debug_toolbar.middleware.DebugToolbarMiddleware", # 3. Best place is right here
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'recipe_sharing_platform.middlewares.rate_limit.GlobalRateLimitMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -116,6 +117,14 @@ DATABASES = {
         'PASSWORD': 'alinps@7034588406',#Enter your mysql password
         'HOST': 'localhost',
         'PORT': '3306',
+    }
+}
+
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "rate-limit-cache",
     }
 }
 
