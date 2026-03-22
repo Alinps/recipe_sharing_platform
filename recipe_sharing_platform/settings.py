@@ -15,9 +15,7 @@ import os
 import cloudinary
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-MEDIA_URL = '/media/'
 
 
 # Quick-start development settings - unsuitable for production
@@ -122,9 +120,9 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework.authentication.TokenAuthentication',
     ),
-    'DEFAULT_PERMISSION_CLASSES': (
-         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly',
-        'rest_framework.permissions.IsAuthenticated', )
+  'DEFAULT_PERMISSION_CLASSES': (
+    'rest_framework.permissions.AllowAny',
+)
 }
 
 
@@ -136,6 +134,8 @@ cloudinary.config(
     api_secret = os.environ.get("CLOUDINARY_API_SECRET"),
 )
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
