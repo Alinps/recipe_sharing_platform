@@ -39,6 +39,7 @@ class Recipe(models.Model):
     ingredients = models.TextField()
     steps = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    description = models.TextField(null=True, blank=True)
     cooking_time = models.CharField(max_length=20)
     difficulty_level = models.CharField(choices=choices,max_length=10)
     image = models.FileField(upload_to='recipe_image/',null=True,blank=True)

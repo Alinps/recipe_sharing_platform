@@ -161,10 +161,11 @@ def create_recipe(request):
         steps = request.data.get("steps")
         cooking_time = request.data.get("cooking_time")
         difficulty_level = request.data.get("difficulty_level")
+        description = request.data.get("discription")
         image = request.FILES.get("image")
 
 
-        if not title or not ingredients or not steps or not cooking_time or not difficulty_level or not image:
+        if not title or not ingredients or not steps or not cooking_time or not difficulty_level or not image or not description:
             return JsonResponse({"message":"all fields are required"})
         recipes = Recipe.objects.create(
             user = user,
@@ -173,6 +174,7 @@ def create_recipe(request):
             steps = steps,
             cooking_time = cooking_time,
             difficulty_level = difficulty_level,
+            description = description,
             image = image
         )
         recipes.save()
@@ -394,6 +396,7 @@ def edit_recipe(request):
         steps = request.data.get('steps')
         cooking_time = request.data.get('cooking_time')
         difficulty_level = request.data.get('difficulty')
+        description = request.data.get('description')
         image = request.FILES.get('image')
 
         if title:
@@ -415,10 +418,14 @@ def edit_recipe(request):
         if difficulty_level:
             recipe.difficulty_level = difficulty_level
             updated_fields.append("difficulty_level")
+        if description:
+            recipe.description = description
+            updated_fields.append("description")
 
         if image:
             recipe.image = image
             updated_fields.append("image")
+        
 
         recipe.save()
 
