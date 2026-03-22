@@ -161,7 +161,7 @@ def create_recipe(request):
         steps = request.data.get("steps")
         cooking_time = request.data.get("cooking_time")
         difficulty_level = request.data.get("difficulty_level")
-        description = request.data.get("discription")
+        description = request.data.get("description")
         image = request.FILES.get("image")
 
 
