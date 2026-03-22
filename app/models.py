@@ -26,7 +26,7 @@ class User(AbstractBaseUser):
     name = models.CharField(max_length =255) 
     is_active = models.BooleanField(default=True) 
     is_admin = models.BooleanField(default=False) 
-    image = models.FileField(upload_to='user_profile_pic/',null=True,blank=True)
+    image = CloudinaryField('image_upload', null=True, blank=True)
     objects = UserManager() 
  
     USERNAME_FIELD = 'email'
