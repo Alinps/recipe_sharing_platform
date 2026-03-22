@@ -19,6 +19,8 @@ from django.db.models import Q
 from .utils.pagination import RecipePagination
 import logging
 import time
+from django.core.files.storage import default_storage
+import os
 
 logger = logging.getLogger("recipe_app")
 
@@ -154,6 +156,11 @@ def Login_user(request):
 @permission_classes((IsAuthenticated,))
 def create_recipe(request):
     user = request.user
+
+    print("STORAGE:", default_storage.__class__)
+    print("CLOUD NAME:", os.environ.get("CLOUDINARY_CLOUD_NAME"))
+    print("FILES:", request.FILES)
+
     logger.info(f"Create recipe request | user={user.id}")
     try:
         title = request.data.get("title")
