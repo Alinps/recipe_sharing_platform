@@ -15,6 +15,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 MEDIA_URL = 'media/'
 
 
@@ -22,13 +23,18 @@ MEDIA_URL = 'media/'
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-sj@(&^k0&o9dl3ch@sa2#igas_^o#$s#0epra6=_zbqoqz125x'
+# SECRET_KEY = 'django-insecure-sj@(&^k0&o9dl3ch@sa2#igas_^o#$s#0epra6=_zbqoqz125x'
+
+SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-secret")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+# DEBUG = True
 
-ALLOWED_HOSTS = []
+DEBUG = os.environ.get("DEBUG", "True") == "True"
 
+# ALLOWED_HOSTS = ["*"]
+
+ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "*").split(",")
 
 # Application definition
 
@@ -57,6 +63,7 @@ INSTALLED_APPS = [
 # ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware', # 1. Security first
+     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     "corsheaders.middleware.CorsMiddleware", # 2. CORS should be high
     'django.middleware.common.CommonMiddleware',
@@ -76,10 +83,19 @@ INTERNAL_IPS = [
 ]
 
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:5173",
-]
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:5173",
+# ]
+# CORS_ALLOW_ALL_ORIGINS = True
+
+
+CORS_ALLOWED_ORIGINS = os.environ.get(
+    "CORS_ALLOWED_ORIGINS", ""
+).split(",")
+
+CSRF_TRUSTED_ORIGINS = os.environ.get(
+    "CSRF_TRUSTED_ORIGINS", ""
+).split(",")
 
 TEMPLATES = [
     {
@@ -110,17 +126,23 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'recipe_db',#Name of the database created for this project
+#         'USER': 'recipe_admin',#Enter your mysql username
+#         'PASSWORD': 'alinps@7034588406',#Enter your mysql password
+#         'HOST': 'localhost',
+#         'PORT': '3306',
+#     }
+# }
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'recipe_db',#Name of the database created for this project
-        'USER': 'recipe_admin',#Enter your mysql username
-        'PASSWORD': 'alinps@7034588406',#Enter your mysql password
-        'HOST': 'localhost',
-        'PORT': '3306',
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / "db.sqlite3",
     }
 }
-
 
 CACHES = {
     "default": {
