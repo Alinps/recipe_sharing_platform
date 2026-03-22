@@ -45,7 +45,7 @@ class Recipe(models.Model):
     description = models.TextField(null=True, blank=True)
     cooking_time = models.CharField(max_length=20)
     difficulty_level = models.CharField(choices=choices,max_length=10)
-    image = CloudinaryField('image', null=True, blank=True)
+    image = CloudinaryField('image_upload', null=True, blank=True)
 
 class WishList(models.Model):
     user = models.ForeignKey("User",on_delete=models.CASCADE)

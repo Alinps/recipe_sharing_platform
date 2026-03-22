@@ -185,6 +185,7 @@ def create_recipe(request):
             image = image
         )
         recipes.save()
+        print("IMAGE URL:", recipes.image.url)
         logger.info(f"Recipe created | user={user.id} | recipe_id={recipes.id}") # type: ignore
         return Response({"message":"Recipe created successfully"},status = 200)
     except Exception as e:
