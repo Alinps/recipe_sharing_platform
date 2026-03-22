@@ -1,7 +1,11 @@
-Django>=5.0
-djangorestframework>=3.14
+Django
+djangorestframework
 django-cors-headers
 gunicorn
 whitenoise
 requests
 PyMySQL
+
+# Cloudinary
+cloudinary
+django-cloudinary-storage
