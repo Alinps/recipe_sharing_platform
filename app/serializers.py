@@ -104,20 +104,43 @@ class ProfileSerializer(serializers.ModelSerializer):
 
 
 
+
+
 class UserProfileSerializer(serializers.ModelSerializer):
-    recipes = RecipeProfileSerializer(source='recipe_set', many=True, read_only=True)
-    image = serializers.SerializerMethodField()  
+    recipes = RecipeProfileSerializer(
+        source='recipe_set',
+        many=True,
+        read_only=True
+    )
+
+    
+    image = serializers.ImageField(required=False, allow_null=True)
 
     class Meta:
         model = User
         fields = ['id', 'name', 'email', 'is_active', 'recipes', 'image']
+        read_only_fields = ['id', 'is_active', 'recipes']
 
-    def get_image(self, obj):
-        if obj.image:
-            return obj.image.url  
-        return None
+    #Handle update (delete old image before replacing)
+    def update(self, instance, validated_data):
+        new_image = validated_data.get('image')
 
+        # If new image uploaded → delete old one
+        if new_image and instance.image:
+            instance.image.delete()
 
+        return super().update(instance, validated_data)
+
+    # Ensure frontend gets full Cloudinary URL
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+
+        if instance.image:
+            data['image'] = instance.image.url
+        else:
+            data['image'] = None
+
+        return data
 
 
 
