@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from app.models import Recipe
 from app.models import User,WishList
-
+import cloudinary.uploader
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -127,7 +127,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
         # If new image uploaded → delete old one
         if new_image and instance.image:
-            instance.image.delete()
+            try:
+                cloudinary.uploader.destroy(instance.image.public_id)
+            except Exception as e:
+                print("Cloudinary delete error:", e)
 
         return super().update(instance, validated_data)
 
