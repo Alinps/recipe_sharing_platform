@@ -18,5 +18,6 @@ urlpatterns = [
     path("profile/<int:user_id>/wishlist/", views.user_wishlist),
     path('wishlist/toggle/', views.toggle_wishlist),
     path("profile/edit/", views.profile),
+    path("health_check/",views.wakeup)
      
 ]

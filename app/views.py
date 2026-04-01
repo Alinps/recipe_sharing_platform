@@ -26,6 +26,31 @@ logger = logging.getLogger("recipe_app")
 
 
 
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def wakeup(request):
+    try:
+
+        logger.info(
+            f"Wakeup ping received"
+        )
+
+        return JsonResponse({
+            "status": "ok",
+            "message": "Server is awake"
+        })
+
+    except Exception as e:
+        logger.exception(
+            f"Wakeup error | error={str(e)}"
+        )
+        return JsonResponse({
+            "status": "error",
+            "message": "Server failed"
+        }, status=500)
+
+
+
 @api_view(['POST'])
 @permission_classes((AllowAny,))
 def Signup(request):
@@ -157,10 +182,7 @@ def Login_user(request):
 def create_recipe(request):
     user = request.user
 
-    print("STORAGE:", default_storage.__class__)
-    print("CLOUD NAME:", os.environ.get("CLOUDINARY_CLOUD_NAME"))
-    print("FILES:", request.FILES)
-
+    
     logger.info(f"Create recipe request | user={user.id}")
     try:
         title = request.data.get("title")
