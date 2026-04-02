@@ -16,7 +16,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY", "fallback-secret")
 
 DEBUG = os.environ.get("DEBUG", "True") == "True"
 
-# ALLOWED_HOSTS = ["*"]
+
 
 
 ALLOWED_HOSTS = os.environ.get("ALLOWED_HOSTS", "").split(",")
@@ -58,21 +58,15 @@ INTERNAL_IPS = [
 ]
 
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:5173",
-# ]
-# CORS_ALLOW_ALL_ORIGINS = True
-CORS_ALLOW_ALL_ORIGINS = True
 
-CORS_ALLOWED_ORIGINS = os.environ.get(
-    "CORS_ALLOWED_ORIGINS", ""
-).split(",")    
+def get_env_list(key):
+    value = os.environ.get(key)
+    return value.split(",") if value else []
 
-CSRF_TRUSTED_ORIGINS = [
-    origin for origin in os.environ.get(
-        "CSRF_TRUSTED_ORIGINS", ""
-    ).split(",") if origin
-]
+ALLOWED_HOSTS = get_env_list("ALLOWED_HOSTS")
+CORS_ALLOWED_ORIGINS = get_env_list("CORS_ALLOWED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = get_env_list("CSRF_TRUSTED_ORIGINS")
+
 
 TEMPLATES = [
     {
