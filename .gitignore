@@ -38,3 +38,5 @@ dist/
 
 test.json
 app.log
+
+.codex

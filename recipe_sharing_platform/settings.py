@@ -182,9 +182,11 @@ LOGGING = {
         },
 
         "file": {
-            "class": "logging.FileHandler",
+            "class": "logging.handlers.RotatingFileHandler",
             "filename": os.path.join(BASE_DIR, "app.log"),
             "formatter": "standard",
+            "maxBytes": 5 * 1024 * 1024,
+            "backupCount": 5,
         },
     },
 
@@ -210,4 +212,3 @@ cloudinary.config(
     api_key = os.environ.get("CLOUDINARY_API_KEY"),
     api_secret = os.environ.get("CLOUDINARY_API_SECRET"),
 )
-
