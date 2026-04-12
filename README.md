@@ -94,7 +94,8 @@ python3 manage.py createsuperuser
 ```bash
 python3 manage.py runserver
 ```
-
+### 7.To run the frontend, please navigate to the frontend repository on my GitHub and clone it to your local machine.
+ [Frontend Repository](https://github.com/Alinps/recipe_sharing_frontend.git)
 ## Authentication
 
 The API uses DRF token authentication.
