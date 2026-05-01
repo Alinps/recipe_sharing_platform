@@ -773,6 +773,10 @@ def profile(request):
                 serializer.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+        except DRFValidationError as e:
+            return Response(
+            {"error": e.detail[0]}, status=400
+        )   
 
         except Exception as e:
             logger.exception(
