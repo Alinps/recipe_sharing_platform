@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from app.models import Recipe
 from app.models import User,WishList
+from rest_framework.exceptions import ValidationError
 import cloudinary.uploader
 
 
@@ -120,6 +121,13 @@ class UserProfileSerializer(serializers.ModelSerializer):
         model = User
         fields = ['id', 'name', 'email', 'is_active', 'recipes', 'image']
         read_only_fields = ['id', 'is_active', 'recipes']
+
+    def validate_image(self,value):
+        if not value.content_type.startswith("image"):
+            raise ValidationError("Only image files are allowed")
+        if value.size > 5*1024*1024:
+            raise ValidationError("Image must be less than 5 MB")
+        return value
 
     #Handle update (delete old image before replacing)
     def update(self, instance, validated_data):

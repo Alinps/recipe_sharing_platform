@@ -71,7 +71,7 @@ def Signup(request):
         if not name or not email or not password:
             logger.warning(f"Signup failed | reason=missing_fields | email={masked_email}")
             return Response(
-                {'message': 'All fields are required'},
+                {'error': 'All fields are required'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -83,7 +83,7 @@ def Signup(request):
                 f"Signup failed | reason=weak_password | email={masked_email} | details={e.messages}"
             )
             return Response(
-                {"message": e.messages},
+                {"error": e.messages},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -93,7 +93,7 @@ def Signup(request):
                 f"Signup failed | reason=email_exists | email={masked_email}"
             )
             return JsonResponse(
-                {'message': 'Email already exist'},
+                {'error': 'Email already exist'},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -141,7 +141,7 @@ def Login_user(request):
         if email is None or password is None:
             logger.warning(f"Login failed | reason=missing_credentials | email={masked_email}")
             return Response(
-                {'message': 'Please provide both username and password'},
+                {'error': 'Please provide both username and password'},
                 status=HTTP_400_BAD_REQUEST
             )
 
@@ -151,10 +151,11 @@ def Login_user(request):
         if not user:
             logger.warning(f"Login failed | reason=invalid_credentials | email={masked_email}")
             return Response(
-                {'message': 'Invalid Credentials'},
+                {'error': 'Invalid Credentials'},
                 status=status.HTTP_401_UNAUTHORIZED
             )
-
+        if not user.is_active:
+            return Response({"error": "User is blocked"}, status=403)   
         #  generate token
         token, _ = Token.objects.get_or_create(user=user)
 
@@ -198,6 +199,7 @@ def create_recipe(request):
 
         if not title or not ingredients or not steps or not cooking_time or not difficulty_level or not image or not description:
             return JsonResponse({"error":"all fields are required"})
+        validate_image(image)
         recipes = Recipe.objects.create(
             user = user,
             title = title,
@@ -208,7 +210,7 @@ def create_recipe(request):
             description = description,
             image = image
         )
-        validate_image(image)
+           
         recipes.save()
         logger.info(f"Recipe created | user={user.id} | recipe_id={recipes.id}") # type: ignore
         return Response({"message":"Recipe created successfully"},status = 200)
@@ -303,7 +305,7 @@ def recipe_details(request, pk):
 
         if not recipe:
             logger.warning(f"Recipe not found | user={user} | recipe_id={pk}")
-            return Response({"message": "Recipe not found"}, status=404)
+            return Response({"error": "Recipe not found"}, status=404)
 
         serializer = RecipeSerializerDetailed(
             recipe, context={'request': request}
@@ -329,7 +331,7 @@ def delete_recipe(request,pk):
     try:
         recipe = Recipe.objects.get(pk=pk)
     except Recipe.DoesNotExist:
-        return Response({"message":"Recipe cannot be deleted"},status=404)
+        return Response({"error":"Recipe cannot be deleted"},status=404)
     if recipe.user != request.user:
         return Response(
             {"error": "Not authorized"},
@@ -345,7 +347,7 @@ def recipe_search(request):
     qtitle = request.query_params.get('qtitle','')
     recipes = Recipe.objects.select_related('user').filter(title__icontains=qtitle)
     if not recipes:
-        return Response({"message":"no items found"})
+        return Response({"error":"no items found"})
     serializer = RecipeSerializerDetailed(recipes,many=True)
     return Response({"data":serializer.data})
 
@@ -366,7 +368,7 @@ def password_change(request):
         if not user.check_password(current_password):
             logger.warning(f"Incorrect current password | user={user.id}")
             return Response(
-                {"message": "Current password is incorrect"},
+                {"error": "Current password is incorrect"},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -374,7 +376,7 @@ def password_change(request):
         if user.check_password(new_password):
             logger.warning(f"New password same as old | user={user.id}")
             return Response(
-                {"message": "New password must be different from current password."},
+                {"error": "New password must be different from current password."},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
@@ -386,7 +388,7 @@ def password_change(request):
                 f"Password validation failed | user={user.id} | reasons={e.messages}"
             )
             return Response(
-                {"message": e.messages},
+                {"error": e.messages},
                 status=status.HTTP_400_BAD_REQUEST
             )
 
