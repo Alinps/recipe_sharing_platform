@@ -17,6 +17,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from django.db.models import Q
 from .utils.pagination import RecipePagination
+from .utils.validateImage import validate_image
 import logging
 import time
 from django.core.files.storage import default_storage
@@ -206,8 +207,8 @@ def create_recipe(request):
             description = description,
             image = image
         )
+        validate_image(image)
         recipes.save()
-        print("IMAGE URL:", recipes.image.url)
         logger.info(f"Recipe created | user={user.id} | recipe_id={recipes.id}") # type: ignore
         return Response({"message":"Recipe created successfully"},status = 200)
     except Exception as e:
@@ -453,6 +454,7 @@ def edit_recipe(request):
             updated_fields.append("description")
 
         if image:
+            validate_image(image)
             recipe.image = image
             updated_fields.append("image")
         
@@ -484,7 +486,6 @@ def edit_recipe(request):
 
 
 
-OPENROUTER_API_KEY = "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"
 
 
 
@@ -497,6 +498,7 @@ def chatbot(request):
     user_message = request.data.get("message", "")
 
     message_length = len(user_message) if user_message else 0
+    OPENROUTER_API_KEY=os.environ.get("OPENROUTER_API_KEY")
 
     logger.info(
         f"Chatbot request | requester={requester} | message_length={message_length}"

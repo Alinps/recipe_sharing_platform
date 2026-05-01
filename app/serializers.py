@@ -14,7 +14,7 @@ class UserSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
-    image = serializers.SerializerMethodField()  # ADD THIS
+    image = serializers.SerializerMethodField()  
 
     class Meta:
         model = Recipe
@@ -22,7 +22,7 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_image(self, obj):
         if obj.image:
-            return obj.image.url   # FULL CLOUDINARY URL
+            return obj.image.url   
         return None
     
 
