@@ -197,7 +197,7 @@ def create_recipe(request):
 
 
         if not title or not ingredients or not steps or not cooking_time or not difficulty_level or not image or not description:
-            return JsonResponse({"message":"all fields are required"})
+            return JsonResponse({"error":"all fields are required"})
         recipes = Recipe.objects.create(
             user = user,
             title = title,
@@ -421,7 +421,7 @@ def edit_recipe(request):
     except Recipe.DoesNotExist:
         logger.warning(f"Recipe not found | user={user} | recipe_id={pk}")
         return Response(
-            {"message": "Recipe not found"},
+            {"error": "Recipe not found"},
             status=status.HTTP_400_BAD_REQUEST
         )
 
@@ -474,6 +474,10 @@ def edit_recipe(request):
         return Response(
             {"message": "Recipe updated successfully"},
             status=status.HTTP_200_OK
+        )
+    except DRFValidationError as e:
+        return Response(
+            {"error": e.detail[0]}, status=400
         )
 
     except Exception as e:
