@@ -11,6 +11,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.status import HTTP_200_OK, HTTP_400_BAD_REQUEST, HTTP_404_NOT_FOUND
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from rest_framework.exceptions import ValidationError as DRFValidationError
 import requests
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
@@ -211,6 +212,11 @@ def create_recipe(request):
         recipes.save()
         logger.info(f"Recipe created | user={user.id} | recipe_id={recipes.id}") # type: ignore
         return Response({"message":"Recipe created successfully"},status = 200)
+    
+    except DRFValidationError as e:
+        # Let DRF handle OR return properly
+        return Response({"error": e.detail[0]}, status=400)
+
     except Exception as e:
         logger.error(f"Error creating recipe | user={user.id} | error={str(e)}")
         return Response({"error": "Something went wrong"}, status=500)

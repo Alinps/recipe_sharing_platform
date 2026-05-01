@@ -125,7 +125,7 @@ class UserProfileSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         new_image = validated_data.get('image')
 
-        # If new image uploaded → delete old one
+        # If new image uploaded -> delete old one
         if new_image and instance.image:
             try:
                 cloudinary.uploader.destroy(instance.image.public_id)
