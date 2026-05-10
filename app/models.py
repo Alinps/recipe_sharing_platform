@@ -27,7 +27,8 @@ class User(AbstractBaseUser):
     is_active = models.BooleanField(default=True) 
     is_admin = models.BooleanField(default=False) 
     image = CloudinaryField('image_upload', null=True, blank=True)
-    objects = UserManager() 
+    objects = UserManager()
+    created_at = models.DateTimeField(auto_now_add=True,null=True, blank=True) 
  
     USERNAME_FIELD = 'email'
 

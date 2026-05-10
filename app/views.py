@@ -15,7 +15,6 @@ from rest_framework.exceptions import ValidationError as DRFValidationError
 import requests
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny
-from rest_framework.response import Response
 from django.db.models import Q
 from .utils.pagination import RecipePagination
 from .utils.validateImage import validate_image
@@ -239,12 +238,12 @@ def create_recipe(request):
 def list_recipe(request):
 
     user = request.user.id if request.user.is_authenticated else "anon"
-    search_query = request.GET.get("search")
+    search_query = request.GET.get("search", "").strip()
     logger.info(f"List recipes request | user={user} | search={search_query}")
 
     try:
         # Base queryset
-        queryset = Recipe.objects.select_related('user').all()
+        queryset = Recipe.objects.select_related('user').only('id', 'title', 'image', 'user').order_by("-created_at")
 
         # Apply search filter
         if search_query:
@@ -254,7 +253,7 @@ def list_recipe(request):
             )
             logger.info(f"Search applied | query='{search_query}'")
 
-        total_count = queryset.count()
+
 
         # Pagination
         paginator = RecipePagination()
@@ -263,7 +262,7 @@ def list_recipe(request):
         serializer = RecipeSerializer(paginated_queryset, many=True)
 
         logger.info(
-            f"Recipes fetched | user={user} | total={total_count} | returned={len(serializer.data)}"
+            f"Recipes fetched | user={user} | returned={len(serializer.data)}"
         )
 
         return paginator.get_paginated_response(serializer.data)
