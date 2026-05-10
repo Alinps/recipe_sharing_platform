@@ -2,11 +2,11 @@ from pathlib import Path
 import os
 import os
 import dj_database_url
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(dotenv_path=BASE_DIR /".env")
+# load_dotenv(dotenv_path=BASE_DIR /".env")
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 
 
