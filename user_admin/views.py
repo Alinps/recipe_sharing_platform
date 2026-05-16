@@ -55,7 +55,14 @@ def admin_login(request):
         logger.info(f"Login successful | user={user.id}") # type: ignore
 
         return Response(
-            {"token":token.key},status=HTTP_200_OK
+            {
+                "token":token.key,
+                "admin":{
+                    "id":user.id, # type: ignore
+                    "name":user.name  # type: ignore
+                }
+                
+                },status=HTTP_200_OK
         )
     except Exception as e:
         logger.exception(
@@ -226,8 +233,8 @@ def user_recipes(request,pk):
 
     if search:
         queryset = queryset.filter(
-            Q(title_icontains=search)|
-            Q(ingredients_icontains=search)
+            Q(title__icontains=search)|
+            Q(ingredients__icontains=search)
         )
 
     paginator = RecipePagination()
