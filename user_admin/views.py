@@ -47,7 +47,8 @@ def admin_login(request):
         if not user.is_admin: # type: ignore
             logger.warning(f"Login failed | reason=unauthorized access | email={masked_email}")
             return Response(
-                {"error":"Access denied. You do not have administrator privileges."}
+                {"error":"Access denied. You do not have administrator privileges."},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         token, _ = Token.objects.get_or_create(user=user)
