@@ -123,7 +123,7 @@ def list_users(request):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-    queryset = User.objects.only("id","email","name","is_active","image").order_by("id")
+    queryset = User.objects.only("id","email","name","is_active","image","created_at").order_by("id")
 
     if search:
         queryset = queryset.filter(
@@ -292,7 +292,7 @@ def recipe_delete(request,pk):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-    recipe = get_object_or_404(Recipe,id=pk)
+    recipe = get_object_or_404(Recipe,id=pk) 
 
     recipe.delete()
 

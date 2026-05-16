@@ -6,7 +6,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ["id","email","name","is_active","image"]
+        fields = ["id","email","name","is_active","image","created_at"]
     
     def get_image(self, obj):
         if obj.image:
